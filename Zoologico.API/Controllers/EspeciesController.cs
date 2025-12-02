@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NuGet.Protocol.Core.Types;
+using Serilog;
 using Zoologico.Modelos;
 
 namespace Zoologico.API.Controllers
@@ -28,6 +29,7 @@ namespace Zoologico.API.Controllers
             try
             {
                 var data = await _context.Especies.ToListAsync();
+                Log.Information($"Especie con id actualizada exitosamente");
                 return ApiResult<List<Especie>>.Ok(data);
             }
             catch (Exception ex)
@@ -52,7 +54,7 @@ namespace Zoologico.API.Controllers
                 {
                     return ApiResult<Especie>.Fail("Datos no encontrados");
                 }
-
+                Log.Information($"Especie con id {id} actualizada exitosamente");
                 return ApiResult<Especie>.Ok(especie);
             }
             catch (Exception ex)
@@ -85,10 +87,12 @@ namespace Zoologico.API.Controllers
                 }
                 else
                 {
+                    Log.Error($"");
                     return ApiResult<Especie>.Fail(ex.Message);
                 }
             }
 
+            Log.Information($"Especie con id {id} actualizada exitosamente");
             return ApiResult<Especie>.Ok(null);
         }
 
@@ -102,6 +106,7 @@ namespace Zoologico.API.Controllers
                 _context.Especies.Add(especie);
                 await _context.SaveChangesAsync();
 
+                Log.Information($"Especie con id  ingresada exitosamente");
                 return ApiResult<Especie>.Ok(especie);
             }
             catch (Exception ex)
@@ -125,6 +130,7 @@ namespace Zoologico.API.Controllers
                 _context.Especies.Remove(especie);
                 await _context.SaveChangesAsync();
 
+                Log.Information($"Especie con id {id} borrada exitosamente");
                 return ApiResult<Especie>.Ok(null);
             }
             catch (Exception ex)

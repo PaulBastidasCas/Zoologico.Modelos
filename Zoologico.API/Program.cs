@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -9,16 +10,25 @@ namespace Zoologico.API
     {
         public static void Main(string[] args)
         {
+            //==============================================================
+            // Configurar Serilog leyendo desde appsettings.json
+            //==============================================================
+            var config = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .Build();
+
+            Log.Logger = new LoggerConfiguration()
+                .ReadFrom.Configuration(config)
+                .CreateLogger();
+
+            Log.Information("Iniciado el proceso de LOGGER");
+
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddDbContext<ZoologicoAPIContext>(options =>
-            //options.UseSqlServer(builder.Configuration.GetConnectionString("ZoologicoAPIContext.sqlserver") ?? throw new InvalidOperationException("Connection string 'ZoologicoAPIContext' not found."))
+            
             options.UseNpgsql(builder.Configuration.GetConnectionString("ZoologicoAPIContext.postgresql") ?? throw new InvalidOperationException("Connection string 'ZoologicoAPIContext' not found."))
-            //options.UseOracle(builder.Configuration.GetConnectionString("ZoologicoAPIContext.oracle") ?? throw new InvalidOperationException("Connection string 'ZoologicoAPIContext' not found."))
-            //options.UseMySql(
-            //    builder.Configuration.GetConnectionString("ZoologicoAPIContext.mariadb") ?? throw new InvalidOperationException("Connection string 'ZoologicoAPIContext' not found."),
-            //    Microsoft.EntityFrameworkCore.ServerVersion.Parse("12.0.2-MariaDB")
-            //)
+
             );
 
             // Add services to the container.
