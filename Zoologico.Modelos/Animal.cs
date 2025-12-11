@@ -11,8 +11,8 @@ namespace Zoologico.Modelos
         public string Genero { get; set; }
 
         // FK
-        public int EspecieCodigo { get; set; }
-        public int RazaId { get; set; }
+        public int? EspecieCodigo { get; set; }
+        public int? RazaId { get; set; }
 
         // Navegacion
         public Especie? Especie { get; set; }

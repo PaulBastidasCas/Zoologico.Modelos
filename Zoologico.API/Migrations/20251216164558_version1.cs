@@ -6,7 +6,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Zoologico.API.Migrations
 {
     /// <inheritdoc />
-    public partial class hola1 : Migration
+    public partial class version1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -46,8 +46,8 @@ namespace Zoologico.API.Migrations
                     Nombres = table.Column<string>(type: "text", nullable: false),
                     Edad = table.Column<int>(type: "integer", nullable: false),
                     Genero = table.Column<string>(type: "text", nullable: false),
-                    EspecieCodigo = table.Column<int>(type: "integer", nullable: false),
-                    RazaId = table.Column<int>(type: "integer", nullable: false)
+                    EspecieCodigo = table.Column<int>(type: "integer", nullable: true),
+                    RazaId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -56,14 +56,12 @@ namespace Zoologico.API.Migrations
                         name: "FK_Animales_Especies_EspecieCodigo",
                         column: x => x.EspecieCodigo,
                         principalTable: "Especies",
-                        principalColumn: "Codigo",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Codigo");
                     table.ForeignKey(
                         name: "FK_Animales_Razas_RazaId",
                         column: x => x.RazaId,
                         principalTable: "Razas",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(

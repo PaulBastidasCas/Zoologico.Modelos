@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -22,42 +22,52 @@ namespace Zoologico.API.Controllers
 
         // GET: api/Animales
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Animal>>> GetAnimales()
+        public async Task<ActionResult<ApiResult<List<Animal>>>> GetAnimales()
         {
-            return await _context
-                .Animales
-                //.Include(a => a.Especie)
-                //.Include(a => a.Raza)
-                .ToListAsync();
+            try
+            {
+                var data = await _context.Animales.ToListAsync();
+                return ApiResult<List<Animal>>.Ok(data);
+            }
+            catch (Exception ex)
+            {
+                return ApiResult<List<Animal>>.Fail(ex.Message);
+            }
         }
 
         // GET: api/Animales/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Animal>> GetAnimal(int id)
+        public async Task<ActionResult<ApiResult<Animal>>> GetAnimal(int id)
         {
-            var animal = await _context
-                .Animales
-                .Include(a => a.Especie)
-                .Include(a => a.Raza)
-                .Where(a => a.Id == id)
-                .FirstOrDefaultAsync();
-
-            if (animal == null)
+            try
             {
-                return NotFound();
-            }
+                var animal = await _context
+                    .Animales
+                    .Include(e => e.Raza)
+                    .Include(e => e.Especie)
+                    .FirstOrDefaultAsync(e => e.Id == id);
 
-            return animal;
+                if (animal == null)
+                {
+                    return ApiResult<Animal>.Fail("DAtos no encontrados");
+                }
+
+                return ApiResult<Animal>.Ok(animal);
+            }
+            catch (Exception ex)
+            {
+                return ApiResult<Animal>.Fail(ex.Message);
+            }
         }
 
         // PUT: api/Animales/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAnimal(int id, Animal animal)
+        public async Task<ActionResult<ApiResult<Animal>>> PutAnimal(int id, Animal animal)
         {
             if (id != animal.Id)
             {
-                return BadRequest();
+                return ApiResult<Animal>.Fail("No coinciden los identificadores");
             }
 
             _context.Entry(animal).State = EntityState.Modified;
@@ -66,56 +76,60 @@ namespace Zoologico.API.Controllers
             {
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException ex)
             {
                 if (!AnimalExists(id))
                 {
-                    return NotFound();
+                    return ApiResult<Animal>.Fail("Datos no encontrados");
                 }
                 else
                 {
-                    throw;
+                    return ApiResult<Animal>.Fail(ex.Message);
                 }
             }
 
-            return NoContent();
+            return ApiResult<Animal>.Ok(null);
         }
 
         // POST: api/Animales
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Animal>> PostAnimal(Animal animal)
+        public async Task<ActionResult<ApiResult<Animal>>> PostAnimal(Animal animal)
         {
-            _context.Animales.Add(animal);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.Animales.Add(animal);
+                await _context.SaveChangesAsync();
 
-            animal.Especie = await _context.Especies.FindAsync(animal.EspecieCodigo);
-            animal.Raza = await _context.Razas.FindAsync(animal.RazaId);
-
-            //animal = await _context
-            //    .Animales
-            //    .Include(a => a.Especie)
-            //    .Include(a => a.Raza)
-            //    .Where(a => a.Id == animal.Id)
-            //    .FirstOrDefaultAsync();
-
-            return CreatedAtAction("GetAnimal", new { id = animal.Id }, animal);
+                return ApiResult<Animal>.Ok(animal);
+            }
+            catch (Exception ex)
+            {
+                return ApiResult<Animal>.Fail(ex.Message);
+            }
         }
 
         // DELETE: api/Animales/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAnimal(int id)
+        public async Task<ActionResult<ApiResult<Animal>>> DeleteAnimal(int id)
         {
-            var animal = await _context.Animales.FindAsync(id);
-            if (animal == null)
+            try
             {
-                return NotFound();
+                var animal = await _context.Animales.FindAsync(id);
+                if (animal == null)
+                {
+                    return ApiResult<Animal>.Fail("Datos no encontrados");
+                }
+
+                _context.Animales.Remove(animal);
+                await _context.SaveChangesAsync();
+
+                return ApiResult<Animal>.Ok(null);
             }
-
-            _context.Animales.Remove(animal);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            catch (Exception ex)
+            {
+                return ApiResult<Animal>.Fail(ex.Message);
+            }
         }
 
         private bool AnimalExists(int id)

@@ -124,7 +124,7 @@ namespace Zoologico.API.Controllers
                 var especie = await _context.Especies.FindAsync(id);
                 if (especie == null)
                 {
-                    return ApiResult<Especie>.Fail("datos no encontrados");
+                    return ApiResult<Especie>.Fail("Datos no encontrados");
                 }
 
                 _context.Especies.Remove(especie);
